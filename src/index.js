@@ -9,16 +9,29 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const upload = multer({
-    dest: 'images'
+    dest: 'uploads',
+    limits: {
+        fileSize: 1000000
+      },
+      fileFilter(req, file, cd) {
+        // if (!file.originalname.endsWith(".pdf")) {
+        //   return cd(new Error("Please upload pdf"))
+        // }
+    
+        if (!file.originalname.match(/\.(doc|docx)$/)) {
+          return cd(new Error("Please upload docs or docx"))
+        }
+    
+        cd(undefined, true)
+      }
 })
 
 app.post('/upload', upload.single('upload'), (req, res) => {
     res.send();
+}, (error, req, res, next) => {
+  res.status(400).send({error: error.message})
 });
 
-app.post('/users/me/avatar', upload.single('upload'), (req, res) => {
-    res.send();
-})
 
 app.use(express.json());
 
